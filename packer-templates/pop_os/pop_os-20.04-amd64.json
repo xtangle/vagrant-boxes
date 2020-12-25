@@ -1,0 +1,96 @@
+{
+  "builders": [
+    {
+      "boot_command": [
+        "<leftCtrlOn><leftAltOn><f3><leftCtrlOff><leftAltOff><wait>",
+        "<wait5>",
+        "pop-os<enter><wait>",
+        "<wait5>",
+        "sudo distinst",
+        " --force-bios",
+        " -s /cdrom/casper/filesystem.squashfs",
+        " -r /cdrom/casper/filesystem.manifest-remove",
+        " -h pop-os",
+        " -k us",
+        " -l en_US.UTF-8",
+        " -b /dev/sda",
+        " -t /dev/sda:msdos",
+        " -n /dev/sda:primary:start:end:ext4:mount=/",
+        " --realname vagrant",
+        " --username vagrant",
+        " --password vagrant",
+        "<enter><wait>",
+        "<wait10m>",
+        "reboot<enter><wait>",
+        "<wait1m30s>",
+        "<leftCtrlOn><leftAltOn><f3><leftCtrlOff><leftAltOff><wait>",
+        "<wait5>",
+        "vagrant<enter><wait>",
+        "vagrant<enter><wait>",
+        "<wait5>",
+        "sudo -E apt-get -y install openssh-server<enter><wait>",
+        "vagrant<enter><wait>",
+        "<wait15s>"
+      ],
+      "boot_wait": "1m",
+      "cpus": "{{ user `cpus` }}",
+      "disk_size": "{{user `disk_size`}}",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "guest_additions_url": "{{ user `guest_additions_url` }}",
+      "guest_os_type": "Ubuntu_64",
+      "hard_drive_interface": "sata",
+      "headless": "{{ user `headless` }}",
+      "http_directory": "{{user `http_directory`}}",
+      "iso_checksum": "{{ user `iso_checksum` }}",
+      "iso_url": "{{ user `iso_url` }}",
+      "memory": "{{ user `memory` }}",
+      "output_directory": "{{ user `build_directory` }}/packer-{{user `template`}}-virtualbox",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_timeout": "20m",
+      "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+      "type": "virtualbox-iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "{{ user `template` }}"
+    }
+  ],
+  "post-processors": [
+    {
+      "output": "{{ user `build_directory` }}/{{user `box_basename`}}.{{.Provider}}.box",
+      "type": "vagrant"
+    }
+  ],
+  "provisioners": [
+    {
+      "environment_vars": [
+        "HOME_DIR=/home/vagrant"
+      ],
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
+      "expect_disconnect": true,
+      "scripts": [
+        "{{template_dir}}/scripts/update.sh",
+        "{{template_dir}}/../_common/sshd.sh",
+        "{{template_dir}}/scripts/sudoers.sh",
+        "{{template_dir}}/../_common/vagrant.sh",
+        "{{template_dir}}/scripts/vagrant.sh",
+        "{{template_dir}}/../_common/virtualbox.sh",
+        "{{template_dir}}/scripts/cleanup.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+  "variables": {
+    "box_basename": "pop_os-20.04",
+    "build_directory": "../../builds",
+    "cpus": "1",
+    "disk_size": "65536",
+    "guest_additions_url": "",
+    "headless": "",
+    "http_directory": "",
+    "iso_checksum": "sha256:9853b665ba0c5ba8aa92653b0c6232a51a8e785eb267c73fbfcbe0cdd9e926a7",
+    "iso_url": "https://pop-iso.sfo2.cdn.digitaloceanspaces.com/20.04/amd64/intel/17/pop-os_20.04_amd64_intel_17.iso",
+    "memory": "2048",
+    "template": "pop_os-20.04-amd64"
+  }
+}
