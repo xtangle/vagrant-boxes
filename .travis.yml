@@ -6,4 +6,4 @@ matrix:
     - language: bash
       script:
         - shellcheck --version
-        - for file in $(find ./packer-templates -type f -name "*.sh"); do shellcheck --format=gcc $file; done;
+        - bash -c 'shopt -s globstar nullglob; shellcheck --format=gcc ./packer-templates/**/*.{sh,ksh,bash}'
