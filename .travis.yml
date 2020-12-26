@@ -1,0 +1,9 @@
+env:
+  global:
+    - SHELLCHECK_OPTS=""
+matrix:
+  include:
+    - language: bash
+      script:
+        - shellcheck --version
+        - for file in $(find ./packer-templates -type f); do shellcheck --format=gcc $file; done;
